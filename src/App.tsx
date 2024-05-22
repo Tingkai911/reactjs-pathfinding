@@ -1,46 +1,32 @@
 import './App.css'
-import {useState, useEffect} from "react";
+import {useState} from "react";
 import {Grid, initializeGrid, SearchProgress} from "./logic/graph.ts";
 import VertexComponent from "./components/VertexComponent.tsx";
 import bfs from "./logic/bfs.ts";
 
 function App() {
-    const gridSize = 10;
+    const stepTime = 1;
+    // Not a hard limit in terms of algorithm implementation, but for grid larger tha 50x50 is hard to fit on screen
+    const minSize = 0;
+    const maxSize = 50;
+
+    const [gridSize, setGridSize] = useState<number>(30);
     const [steps, setSteps] = useState<number>(0);
     const [progress, setProgress] = useState<SearchProgress>(SearchProgress.NOT_STARTED);
     const [start, setStart] = useState<number[] | null>(null)
     const [goal, setGoal] = useState<number[] | null>(null)
-
-    // TODO: Replace with useContext
     const [grid, setGrid] = useState<Grid>(initializeGrid(gridSize));
-
-    // TODO: Not working - only run once at the end instead of at every step of the search
-    useEffect( () => {
-        console.log("Num steps: ", steps);
-        console.log("Progress: ", progress);
-        if (progress === SearchProgress.INCOMPLETE) {
-            alert("No path found between start and goal.");
-        }
-        const newGrid: Grid = grid.map(rowArray =>
-            rowArray.map(cell => ({
-                ...cell
-            }))
-        );
-        setGrid(newGrid);
-    }, [progress, steps]);
 
     const handleGridClick = (row: number, col: number): void => {
         if (progress !== SearchProgress.NOT_STARTED) {
             return;
         }
-
         // Deep Copy
         const newGrid: Grid = grid.map(rowArray =>
             rowArray.map(cell => ({
                 ...cell
             }))
         );
-
         // Set start
         if (!grid.some(row => row.some(cell => cell.isStart))) {
             newGrid[row][col].isStart = true;
@@ -55,13 +41,12 @@ function App() {
         else {
             newGrid[row][col].isObstacle = !newGrid[row][col].isObstacle;
         }
-
         setGrid(newGrid);
     };
 
     const startBFS = (): void => {
         if (start && goal && progress === SearchProgress.NOT_STARTED) {
-            bfs(start, goal, grid, setSteps, setProgress);
+            bfs(start, goal, grid, stepTime, setSteps, setProgress, setGrid);
         }
         else if (progress !== SearchProgress.NOT_STARTED) {
             alert("Please reset the grid first before starting a new search,");
@@ -72,6 +57,9 @@ function App() {
     };
 
     const resetGrid = (): void => {
+        if (progress === SearchProgress.IN_PROGRESS) {
+            return;
+        }
         setGrid(initializeGrid(gridSize));
         setSteps(0);
         setStart(null);
@@ -79,14 +67,44 @@ function App() {
         setProgress(SearchProgress.NOT_STARTED);
     };
 
+    const handleGridSizeChange = (event: { target: { value: string; }; }): void => {
+        if (event.target.value.trim().length === 0) {
+            setGridSize(0);
+            setGrid(initializeGrid(0));
+            setStart(null);
+            setGoal(null);
+            alert("Please select a grid size that is between 0 to 50");
+            return;
+        }
+        const newSize: number = parseInt(event.target.value, 10);
+        if (!isNaN(newSize) && newSize >= minSize && newSize <= maxSize && progress !== SearchProgress.IN_PROGRESS) {
+            console.log(newSize);
+            setGridSize(newSize);
+            setGrid(initializeGrid(newSize));
+            setStart(null);
+            setGoal(null);
+        }
+        else {
+            alert(`Please select a grid size that is between ${minSize} and ${maxSize}`);
+        }
+    };
+
     return (
         <>
-            <div style={{display: 'flex'}}>
-                <div style={{marginRight: '20px'}}>
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
+                <div style={{marginBottom: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     <h3>Nodes visited: {steps}</h3>
-                    <div style={{ marginBottom: '10px' }}>
-                        <button onClick={startBFS} style={{ display: 'block', marginBottom: '10px' }}>Start BFS</button>
-                        <button onClick={resetGrid} style={{ display: 'block' }}>Reset Grid</button>
+                    <label htmlFor="gridSizeInput" style={{marginBottom: '5px'}}>Grid Size (n x n):</label>
+                    <input
+                        id="gridSizeInput"
+                        type="number"
+                        value={gridSize}
+                        onChange={handleGridSizeChange}
+                        style={{marginBottom: '10px'}}
+                    />
+                    <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '300px'}}>
+                        <button onClick={startBFS} style={{marginRight: '10px'}}>Start</button>
+                        <button onClick={resetGrid}>Reset</button>
                     </div>
                 </div>
                 <div style={{

@@ -35,7 +35,11 @@ const VertexComponent: React.FC<Vertex> = ({x, y, isObstacle, isPath,
         border: '1px solid black'
     };
 
-    return <div style={style} onClick={onClick}></div>;
+    return (
+        <>
+            <div style={style} onClick={onClick}></div>
+        </>
+    );
 };
 
 export default VertexComponent;

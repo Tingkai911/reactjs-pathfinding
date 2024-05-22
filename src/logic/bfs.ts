@@ -2,13 +2,13 @@ import Vertex, {directions, Grid, SearchProgress, vertexToConsole} from "./graph
 import Queue from "./queue.ts";
 import React from "react";
 
-function bfs(start: number[], goal: number[], grid: Grid,
+async function bfs(start: number[], goal: number[], grid: Grid, stepTime: number,
                    setSteps: React.Dispatch<React.SetStateAction<number>>,
-                   setProgress: React.Dispatch<React.SetStateAction<SearchProgress>>): void {
+                   setProgress: React.Dispatch<React.SetStateAction<SearchProgress>>,
+                   setGrid: React.Dispatch<React.SetStateAction<Grid>>): Promise<void> {
     const queue: Queue<Vertex> = new Queue();
     const seen: Set<string> = new Set();
     const size: number = grid.length;
-    let steps: number = 0;
     setProgress(SearchProgress.IN_PROGRESS);
 
     console.log("Size:", size);
@@ -39,13 +39,14 @@ function bfs(start: number[], goal: number[], grid: Grid,
             currNode.isExplored = true;
             console.log("Explored ", seen);
 
-            // Update the number of steps to rerender App.tsx
-            setSteps(++steps);
+            await new Promise((resolve) => setTimeout(resolve, stepTime));
+            setSteps((prev) => prev + 1);
+            setGrid(grid);
 
             if (currNode.x === goalNode.x && currNode.y === goalNode.y) {
                 console.log("Goal Found");
-                getPath(goalNode);
-                // Draw the path from start to goal
+                drawPath(goalNode);
+                setGrid(grid);
                 setProgress(SearchProgress.COMPLETE);
                 return;
             }
@@ -66,10 +67,11 @@ function bfs(start: number[], goal: number[], grid: Grid,
         }
     }
 
+    setGrid(grid);
     setProgress(SearchProgress.INCOMPLETE);
 }
 
-function getPath(goalNode: Vertex): void {
+function drawPath(goalNode: Vertex): void {
     console.log("Start getPath")
     let currNode: Vertex | null = goalNode;
     while (currNode != null) {
