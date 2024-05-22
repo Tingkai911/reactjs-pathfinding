@@ -4,12 +4,13 @@ import {Grid, initializeGrid, SearchProgress} from "./logic/graph.ts";
 import VertexComponent from "./components/VertexComponent.tsx";
 import bfs from "./logic/bfs.ts";
 import dfs from "./logic/dfs.ts";
+import astar from "./logic/astar.ts";
 
 function App() {
-    const stepTime = 1;
+    const stepTime: number = 1;
     // Not a hard limit in terms of algorithm implementation, but for grid larger tha 50x50 is hard to fit on screen
-    const minSize = 0;
-    const maxSize = 50;
+    const minSize: number = 0;
+    const maxSize: number = 50;
 
     const [gridSize, setGridSize] = useState<number>(30);
     const [steps, setSteps] = useState<number>(0);
@@ -51,7 +52,11 @@ function App() {
             if (algorithm === "DFS") {
                 dfs(start, goal, grid, stepTime, setSteps, setProgress, setGrid);
             }
+            else if (algorithm === "A*") {
+                astar(start, goal, grid, stepTime, setSteps, setProgress, setGrid);
+            }
             else {
+                // Defaults to BFS
                 setAlgorithm("BFS")
                 bfs(start, goal, grid, stepTime, setSteps, setProgress, setGrid);
             }
@@ -126,6 +131,7 @@ function App() {
                     >
                         <option value="BFS">Breadth-First Search (BFS)</option>
                         <option value="DFS">Depth-First Search (DFS)</option>
+                        <option value="A*">A* Search</option>
                     </select>
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '300px'}}>
                         <button onClick={startBFS} style={{marginRight: '10px'}}>Start</button>

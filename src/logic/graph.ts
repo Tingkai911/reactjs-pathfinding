@@ -7,7 +7,7 @@ interface Vertex {
     x: number;
     y: number;
     prevNode: Vertex | null;
-    onClick: () => void;
+    onClick?: () => void;
 }
 
 export type Grid = Vertex[][];
@@ -23,8 +23,6 @@ export const initializeGrid = (size: number): Vertex[][] => {
             x: x,
             y: y,
             prevNode: null,
-            onClick: () => {
-            },
         }))
     );
 };
