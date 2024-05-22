@@ -1,16 +1,17 @@
-import Vertex, {directions, Grid, vertexToConsole} from "./graph.ts";
+import Vertex, {directions, Grid, SearchProgress, vertexToConsole} from "./graph.ts";
 import Queue from "./queue.ts";
 import React from "react";
 
 function bfs(start: number[], goal: number[], grid: Grid,
-             setSteps: React.Dispatch<React.SetStateAction<number>>,
-             setComplete: React.Dispatch<React.SetStateAction<boolean>>) {
+                   setSteps: React.Dispatch<React.SetStateAction<number>>,
+                   setProgress: React.Dispatch<React.SetStateAction<SearchProgress>>): void {
     const queue: Queue<Vertex> = new Queue();
     const seen: Set<string> = new Set();
     const size: number = grid.length;
     let steps: number = 0;
+    setProgress(SearchProgress.IN_PROGRESS);
 
-    console.log("Size:", size)
+    console.log("Size:", size);
 
     const startNode: Vertex = grid[start[0]][start[1]];
     startNode.isStart = true;
@@ -27,7 +28,7 @@ function bfs(start: number[], goal: number[], grid: Grid,
     queue.enqueue(startNode);
 
     while (queue.size() > 0) {
-        const currNode: Vertex | undefined = queue.dequeue()
+        const currNode: Vertex | undefined = queue.dequeue();
         if (currNode) {
             const key: string = generateKey(currNode.x, currNode.y);
 
@@ -45,7 +46,7 @@ function bfs(start: number[], goal: number[], grid: Grid,
                 console.log("Goal Found");
                 getPath(goalNode);
                 // Draw the path from start to goal
-                setComplete(true);
+                setProgress(SearchProgress.COMPLETE);
                 return;
             }
 
@@ -55,13 +56,17 @@ function bfs(start: number[], goal: number[], grid: Grid,
                 if (isValid(currNode.x + dx, currNode.y + dy, size)
                     && !seen.has(generateKey(currNode.x + dx, currNode.y + dy))) {
                     const nextNode: Vertex = grid[currNode.x + dx][currNode.y + dy];
-                    // vertexToConsole(nextNode)
-                    nextNode.prevNode = currNode;
-                    queue.enqueue(nextNode);
+                    if (!nextNode.isObstacle) {
+                        // vertexToConsole(nextNode)
+                        nextNode.prevNode = currNode;
+                        queue.enqueue(nextNode);
+                    }
                 }
             }
         }
     }
+
+    setProgress(SearchProgress.INCOMPLETE);
 }
 
 function getPath(goalNode: Vertex): void {
@@ -76,7 +81,7 @@ function getPath(goalNode: Vertex): void {
 }
 
 function generateKey(x: number, y: number): string {
-    return `(${x},${y})`
+    return `(${x},${y})`;
 }
 
 function isValid(x: number, y: number, size: number): boolean {
