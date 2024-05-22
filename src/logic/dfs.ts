@@ -1,12 +1,12 @@
 import Vertex, {directions, drawPath, generateKey, Grid, isValid, SearchProgress, vertexToConsole} from "./graph.ts";
-import Queue from "./queue.ts";
+import Stack from "./stack.ts";
 import React from "react";
 
-async function bfs(start: number[], goal: number[], grid: Grid, stepTime: number,
+async function dfs(start: number[], goal: number[], grid: Grid, stepTime: number,
                    setSteps: React.Dispatch<React.SetStateAction<number>>,
                    setProgress: React.Dispatch<React.SetStateAction<SearchProgress>>,
                    setGrid: React.Dispatch<React.SetStateAction<Grid>>): Promise<void> {
-    const queue: Queue<Vertex> = new Queue();
+    const queue: Stack<Vertex> = new Stack();
     const seen: Set<string> = new Set();
     const size: number = grid.length;
     setProgress(SearchProgress.IN_PROGRESS);
@@ -25,10 +25,10 @@ async function bfs(start: number[], goal: number[], grid: Grid, stepTime: number
     console.log("Goal Node");
     vertexToConsole(goalNode);
 
-    queue.enqueue(startNode);
+    queue.push(startNode);
 
     while (queue.size() > 0) {
-        const currNode: Vertex | undefined = queue.dequeue();
+        const currNode: Vertex | undefined = queue.pop();
         if (currNode) {
             const key: string = generateKey(currNode.x, currNode.y);
 
@@ -60,7 +60,7 @@ async function bfs(start: number[], goal: number[], grid: Grid, stepTime: number
                     if (!nextNode.isObstacle) {
                         // vertexToConsole(nextNode)
                         nextNode.prevNode = currNode;
-                        queue.enqueue(nextNode);
+                        queue.push(nextNode);
                     }
                 }
             }
@@ -71,4 +71,4 @@ async function bfs(start: number[], goal: number[], grid: Grid, stepTime: number
     setProgress(SearchProgress.INCOMPLETE);
 }
 
-export default bfs;
+export default dfs;

@@ -44,3 +44,22 @@ export enum SearchProgress {
 export const directions = [[1,0], [-1,0], [0,1], [0,-1]]
 
 export default Vertex;
+
+export function drawPath(goalNode: Vertex): void {
+    console.log("Start getPath")
+    let currNode: Vertex | null = goalNode;
+    while (currNode != null) {
+        console.log(generateKey(currNode.x, currNode.y));
+        currNode.isPath = true;
+        currNode = currNode.prevNode;
+    }
+    console.log("End getPath")
+}
+
+export function generateKey(x: number, y: number): string {
+    return `(${x},${y})`;
+}
+
+export function isValid(x: number, y: number, size: number): boolean {
+    return x >= 0 && x < size && y >= 0 && y < size;
+}
