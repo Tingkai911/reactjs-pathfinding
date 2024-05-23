@@ -109,6 +109,10 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             seenForward.set(nextKey, nextPQNode);
                             pqForward.insert(nextPQNode);
                             nextPQNode.vertex.isExplored = true;
+                            console.log("Explored Forward ", seenForward);
+                            await new Promise((resolve) => setTimeout(resolve, stepTime));
+                            setSteps((prev) => prev + 1);
+                            setGrid(grid);
                         }
                         // If neighbour in forward frontier and a lower cost path is found, we want to explore that as well.
                         const existPQNode : PQNode | undefined = seenForward.get(nextKey);
@@ -116,12 +120,10 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             seenForward.set(nextKey, nextPQNode);  // Overwrite
                             pqForward.insert(nextPQNode);  // Add to forward frontier
                             nextPQNode.vertex.isExplored = true;
+                            console.log("Explored Forward ", seenForward);
+                            await new Promise((resolve) => setTimeout(resolve, stepTime));
+                            setGrid(grid);
                         }
-
-                        console.log("Explored Forward ", seenForward);
-                        await new Promise((resolve) => setTimeout(resolve, stepTime));
-                        setSteps((prev) => prev + 1);
-                        setGrid(grid);
 
                         // If neighbour in backward frontier
                         if (seenBackward.has(nextKey)) {
@@ -167,6 +169,10 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             seenBackward.set(nextKey, nextPQNode);
                             pqBackward.insert(nextPQNode);
                             nextPQNode.vertex.isExplored = true;
+                            console.log("Explored Backward ", seenBackward);
+                            await new Promise((resolve) => setTimeout(resolve, stepTime));
+                            setSteps((prev) => prev + 1);
+                            setGrid(grid);
                         }
                         // If neighbour in backward frontier and a lower cost path is found, we want to explore that as well.
                         const existPQNode : PQNode | undefined = seenBackward.get(nextKey);
@@ -174,12 +180,10 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             seenBackward.set(nextKey, nextPQNode);  // Overwrite
                             pqBackward.insert(nextPQNode);  // Add to backward frontier
                             nextPQNode.vertex.isExplored = true;
+                            console.log("Explored Backward ", seenBackward);
+                            await new Promise((resolve) => setTimeout(resolve, stepTime));
+                            setGrid(grid);
                         }
-
-                        console.log("Explored Backward ", seenBackward);
-                        await new Promise((resolve) => setTimeout(resolve, stepTime));
-                        setSteps((prev) => prev + 1);
-                        setGrid(grid);
 
                         // If neighbour in forward frontier
                         if (seenForward.has(nextKey)) {
@@ -197,23 +201,23 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                 }
             }
         }
-
-        if (forwardMeetingNode === null || backwardMeetingNode === null) {
-            setGrid(grid);
-            setProgress(SearchProgress.INCOMPLETE);
-            return;
-        }
-
-        // Reconstruct Path
-        if (forwardMeetingNode) {
-            drawPath(forwardMeetingNode);
-        }
-        if (backwardMeetingNode) {
-            drawPath(backwardMeetingNode);
-        }
-        setGrid(grid);
-        setProgress(SearchProgress.COMPLETE);
     }
+
+    if (forwardMeetingNode === null || backwardMeetingNode === null) {
+        setGrid(grid);
+        setProgress(SearchProgress.INCOMPLETE);
+        return;
+    }
+
+    // Reconstruct Path
+    if (forwardMeetingNode) {
+        drawPath(forwardMeetingNode);
+    }
+    if (backwardMeetingNode) {
+        drawPath(backwardMeetingNode);
+    }
+    setGrid(grid);
+    setProgress(SearchProgress.COMPLETE);
 }
 
 function manhattanDistance(start: number[], goal: number[]): number {
