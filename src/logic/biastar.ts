@@ -37,6 +37,7 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
     pqForward.insert(startPQNode);
     seenForward.set(generateKey(startNode.x, startNode.y), startPQNode)
     startNode.isStart = true;
+    setSteps((prev) => prev + 1);
 
     // Expand from goal to start
     const pqBackward: PriorityQueue<PQNode> = new PriorityQueue((a, b) => {
@@ -110,7 +111,10 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             nextPQNode.vertex.isExplored = true;
                             console.log("Explored Forward ", seenForward);
                             await new Promise((resolve) => setTimeout(resolve, stepTime));
-                            setSteps((prev) => prev + 1);
+                            // Avoid double counting visited nodes
+                            if (!seenBackward.has(nextKey)) {
+                                setSteps((prev) => prev + 1);
+                            }
                             setGrid(grid);
                         }
                         // If neighbour in forward frontier and a lower cost path is found, we want to explore that as well.
@@ -168,7 +172,10 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             nextPQNode.vertex.isExplored = true;
                             console.log("Explored Backward ", seenBackward);
                             await new Promise((resolve) => setTimeout(resolve, stepTime));
-                            setSteps((prev) => prev + 1);
+                            // Avoid double counting visited nodes
+                            if (!seenForward.has(nextKey)) {
+                                setSteps((prev) => prev + 1);
+                            }
                             setGrid(grid);
                         }
                         // If neighbour in backward frontier and a lower cost path is found, we want to explore that as well.
