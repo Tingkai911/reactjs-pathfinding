@@ -75,9 +75,8 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
             if (forwardNode.cost + backwardNode.cost >= bestPathCost) {
                 break;
             }
-            // Terminate if the cost + heuristic of both frontier exceed the best cost found
-            if ((forwardNode.cost + forwardNode.heuristic) >= bestPathCost
-                || (backwardNode.cost + backwardNode.heuristic) >= bestPathCost) {
+            // Terminate if the  heuristic of both frontier exceed the best cost found
+            if (forwardNode.heuristic >= bestPathCost || backwardNode.heuristic >= bestPathCost) {
                 break;
             }
         }
@@ -86,7 +85,6 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
         if (pqForward.size() <= pqBackward.size() && forwardNode !== null) {
             pqForward.remove();
             const cost: number = forwardNode.cost;
-
             for (const direction of directions) {
                 const dx: number = direction[0];
                 const dy: number = direction[1];
@@ -125,7 +123,6 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             await new Promise((resolve) => setTimeout(resolve, stepTime));
                             setGrid(grid);
                         }
-
                         // If neighbour in backward frontier
                         if (seenBackward.has(nextKey)) {
                             const seenBackwardPQNode: PQNode | undefined = seenBackward.get(nextKey);
@@ -146,7 +143,6 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
         else if (backwardNode !== null) {
             pqBackward.remove();
             const cost: number = backwardNode.cost;
-
             for (const direction of directions) {
                 const dx: number = direction[0];
                 const dy: number = direction[1];
@@ -185,7 +181,6 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             await new Promise((resolve) => setTimeout(resolve, stepTime));
                             setGrid(grid);
                         }
-
                         // If neighbour in forward frontier
                         if (seenForward.has(nextKey)) {
                             const seenForwardPQNode: PQNode | undefined = seenForward.get(nextKey);
