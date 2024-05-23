@@ -129,6 +129,7 @@ function App() {
         setGrid(randomizedGrid);
         setStart(startPos);
         setGoal(goalPos);
+        setSteps(0);
         setProgress(SearchProgress.NOT_STARTED);
     };
 

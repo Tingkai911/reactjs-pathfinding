@@ -17,7 +17,7 @@ function createMaze(grid: Vertex[][]): [Vertex[][], number[], number[]] {
     // Randomly assign start and goal positions with a minimum distance
     const startPos = getRandomPosition(n);
     let goalPos = getRandomPosition(n);
-    const minDistance = Math.floor(n / 1.5);
+    const minDistance = Math.floor(n / 1.25);  // Tune here
     while (distance(startPos.x, startPos.y, goalPos.x, goalPos.y) < minDistance) {
         goalPos = getRandomPosition(n);
     }
@@ -74,20 +74,57 @@ function createMaze(grid: Vertex[][]): [Vertex[][], number[], number[]] {
     // Ensure path to goal
     let currentX = startPos.x;
     let currentY = startPos.y;
+    const visited: Set<string> = new Set();
+    visited.add(`${currentX},${currentY}`);
+
     while (currentX !== goalPos.x || currentY !== goalPos.y) {
-        let direction;
-        if (currentX < goalPos.x) {
-            direction = { dx: 1, dy: 0 };
-        } else if (currentX > goalPos.x) {
-            direction = { dx: -1, dy: 0 };
-        } else if (currentY < goalPos.y) {
-            direction = { dx: 0, dy: 1 };
-        } else {
-            direction = { dx: 0, dy: -1 };
+        const nextSteps = [];
+
+        if (currentX < goalPos.x && !visited.has(`${currentX + 1},${currentY}`)) {
+            nextSteps.push({dx: 1, dy: 0});
         }
-        currentX += direction.dx;
-        currentY += direction.dy;
-        grid[currentX][currentY].isObstacle = false;
+        if (currentX > goalPos.x && !visited.has(`${currentX - 1},${currentY}`)) {
+            nextSteps.push({dx: -1, dy: 0});
+        }
+        if (currentY < goalPos.y && !visited.has(`${currentX},${currentY + 1}`)) {
+            nextSteps.push({dx: 0, dy: 1});
+        }
+        if (currentY > goalPos.y && !visited.has(`${currentX},${currentY - 1}`)) {
+            nextSteps.push({dx: 0, dy: -1});
+        }
+
+        // Add random movement to create a less straightforward path
+        if (Math.random() < 0.5) {
+            const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+            const randomX = currentX + randomDirection.dx;
+            const randomY = currentY + randomDirection.dy;
+            if (isValid(randomX, randomY, n) && !visited.has(`${randomX},${randomY}`)) {
+                nextSteps.push(randomDirection);
+            }
+        }
+
+        // Shuffle next steps to add randomness
+        shuffle(nextSteps);
+
+        if (nextSteps.length > 0) {
+            const direction = nextSteps[0];
+            currentX += direction.dx;
+            currentY += direction.dy;
+            grid[currentX][currentY].isObstacle = false;
+            visited.add(`${currentX},${currentY}`);
+        } else {
+            // If no next steps are available, backtrack to find a new path
+            for (let i = visited.size - 1; i >= 0; i--) {
+                const pos = Array.from(visited)[i];
+                const [x, y] = pos.split(',').map(Number);
+                currentX = x;
+                currentY = y;
+                if (currentX === goalPos.x && currentY === goalPos.y) {
+                    break;
+                }
+                visited.delete(pos);
+            }
+        }
     }
 
     return [grid, [startPos.x, startPos.y], [goalPos.x, goalPos.y]];
