@@ -74,8 +74,9 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
             if (forwardNode.cost + backwardNode.cost >= bestPathCost) {
                 break;
             }
-            // Terminate if the lowest heuristic of both frontier exceed the best cost found
-            if (forwardNode.heuristic + backwardNode.heuristic >= bestPathCost) {
+            // Terminate if the cost + heuristic of both frontier exceed the best cost found
+            if ((forwardNode.cost + forwardNode.heuristic) >= bestPathCost
+                || (backwardNode.cost + backwardNode.heuristic) >= bestPathCost) {
                 break;
             }
         }
@@ -100,6 +101,9 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             prevPQNode: forwardNode,
                         }
                         const nextPathCost: number = nextPQNode.cost + nextPQNode.heuristic;
+                        if (nextPathCost > bestPathCost) {
+                            continue;
+                        }
                         // If neighbour not in forward frontier
                         if (!seenForward.has(nextKey)) {
                             seenForward.set(nextKey, nextPQNode);
@@ -155,6 +159,9 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                             prevPQNode: backwardNode,
                         }
                         const nextPathCost: number = nextPQNode.cost + nextPQNode.heuristic;
+                        if (nextPathCost > bestPathCost) {
+                            continue;
+                        }
                         // If neighbour not in backward frontier
                         if (!seenBackward.has(nextKey)) {
                             seenBackward.set(nextKey, nextPQNode);
