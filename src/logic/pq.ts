@@ -75,6 +75,13 @@ class PriorityQueue<T> {
         return min;
     }
 
+    public peek(): T | null {
+        if (this.heap.length === 0) {
+            return null;
+        }
+        return this.heap[0];
+    }
+
     public size(): number {
         return this.heap.length;
     }

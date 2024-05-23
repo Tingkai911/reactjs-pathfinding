@@ -5,6 +5,7 @@ import VertexComponent from "./components/VertexComponent.tsx";
 import bfs from "./logic/bfs.ts";
 import dfs from "./logic/dfs.ts";
 import astar from "./logic/astar.ts";
+import biastar from "./logic/biastar.ts";
 
 function App() {
     const stepTime: number = 1;
@@ -54,6 +55,9 @@ function App() {
             }
             else if (algorithm === "A*") {
                 astar(start, goal, grid, stepTime, setSteps, setProgress, setGrid);
+            }
+            else if (algorithm === "Bi-A*") {
+                biastar(start, goal, grid, stepTime, setSteps, setProgress, setGrid);
             }
             else {
                 // Defaults to BFS
@@ -132,6 +136,7 @@ function App() {
                         <option value="BFS">Breadth-First Search (BFS)</option>
                         <option value="DFS">Depth-First Search (DFS)</option>
                         <option value="A*">A* Search</option>
+                        <option value="Bi-A*">Bidirectional A* Search</option>
                     </select>
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '300px'}}>
                         <button onClick={startBFS} style={{marginRight: '10px'}}>Start</button>

@@ -90,9 +90,10 @@ async function astar(start: number[], goal: number[], grid: Grid, stepTime: numb
                             pq.insert(nextPQNode);
                         }
                         // If a lower cost path is found, we want to explore that as well.
-                        const existCost : number | undefined = seen.get(generateKey(vertex.x + dx, vertex.y + dy));
-                        if (existCost !== undefined && existCost < (nextPQNode.cost + nextPQNode.heuristic)) {
-                            seen.set(key, nextPQNode.cost + nextPQNode.heuristic);
+                        const existCost: number | undefined = seen.get(generateKey(vertex.x + dx, vertex.y + dy));
+                        const nextCost: number = nextPQNode.cost + nextPQNode.heuristic;
+                        if (existCost !== undefined && existCost > nextCost) {
+                            seen.set(generateKey(vertex.x + dx, vertex.y + dy), nextPQNode.cost + nextPQNode.heuristic);
                             pq.insert(nextPQNode);
                         }
                     }
