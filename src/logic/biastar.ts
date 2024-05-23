@@ -57,6 +57,7 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
     pqBackward.insert(goalPQNode);
     seenBackward.set(generateKey(goalNode.x, goalNode.y), goalPQNode)
     goalNode.isExplored = true;
+    setSteps((prev) => prev + 1);
 
     // Managing midpoint where the 2 frontiers meet
     let bestPathCost: number = Number.MAX_VALUE;
