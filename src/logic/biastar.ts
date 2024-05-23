@@ -35,9 +35,6 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
         prevPQNode: null,
     }
     pqForward.insert(startPQNode);
-    seenForward.set(generateKey(startNode.x, startNode.y), startPQNode)
-    startNode.isStart = true;
-    setSteps((prev) => prev + 1);
 
     // Expand from goal to start
     const pqBackward: PriorityQueue<PQNode> = new PriorityQueue((a, b) => {
@@ -56,9 +53,6 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
         prevPQNode: null,
     }
     pqBackward.insert(goalPQNode);
-    seenBackward.set(generateKey(goalNode.x, goalNode.y), goalPQNode)
-    goalNode.isExplored = true;
-    setSteps((prev) => prev + 1);
 
     // Managing midpoint where the 2 frontiers meet
     let bestPathCost: number = Number.MAX_VALUE;
@@ -86,6 +80,22 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
         if (pqForward.size() <= pqBackward.size() && forwardNode !== null) {
             pqForward.remove();
             const cost: number = forwardNode.cost;
+            const key: string = generateKey(forwardNode.vertex.x, forwardNode.vertex.y);
+
+            if (seenForward.has(key)) {
+                continue;
+            }
+            seenForward.set(key, forwardNode);
+
+            forwardNode.vertex.isExplored = true;
+            console.log("Explored Forward ", seenForward);
+            await new Promise((resolve) => setTimeout(resolve, stepTime));
+            // Avoid double counting visited nodes
+            if (!seenBackward.has(key)) {
+                setSteps((prev) => prev + 1);
+            }
+            setGrid(grid);
+
             for (const direction of directions) {
                 const dx: number = direction[0];
                 const dy: number = direction[1];
@@ -106,26 +116,13 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                         }
                         // If neighbour not in forward frontier
                         if (!seenForward.has(nextKey)) {
-                            seenForward.set(nextKey, nextPQNode);
                             pqForward.insert(nextPQNode);
-                            nextPQNode.vertex.isExplored = true;
-                            console.log("Explored Forward ", seenForward);
-                            await new Promise((resolve) => setTimeout(resolve, stepTime));
-                            // Avoid double counting visited nodes
-                            if (!seenBackward.has(nextKey)) {
-                                setSteps((prev) => prev + 1);
-                            }
-                            setGrid(grid);
                         }
                         // If neighbour in forward frontier and a lower cost path is found, we want to explore that as well.
                         const existPQNode : PQNode | undefined = seenForward.get(nextKey);
                         if (existPQNode !== undefined && (existPQNode.cost + existPQNode.heuristic) > nextPathCost) {
                             seenForward.set(nextKey, nextPQNode);  // Overwrite
                             pqForward.insert(nextPQNode);  // Add to forward frontier
-                            nextPQNode.vertex.isExplored = true;
-                            console.log("Explored Forward ", seenForward);
-                            await new Promise((resolve) => setTimeout(resolve, stepTime));
-                            setGrid(grid);
                         }
                         // If neighbour in backward frontier
                         if (seenBackward.has(nextKey)) {
@@ -147,6 +144,22 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
         else if (backwardNode !== null) {
             pqBackward.remove();
             const cost: number = backwardNode.cost;
+            const key: string = generateKey(backwardNode.vertex.x, backwardNode.vertex.y);
+
+            if (seenBackward.has(key)) {
+                continue;
+            }
+            seenBackward.set(key, backwardNode);
+
+            backwardNode.vertex.isExplored = true;
+            console.log("Explored Backward ", seenBackward);
+            await new Promise((resolve) => setTimeout(resolve, stepTime));
+            // Avoid double counting visited nodes
+            if (!seenForward.has(key)) {
+                setSteps((prev) => prev + 1);
+            }
+            setGrid(grid);
+
             for (const direction of directions) {
                 const dx: number = direction[0];
                 const dy: number = direction[1];
@@ -167,26 +180,13 @@ async function bi_astar(start: number[], goal: number[], grid: Grid, stepTime: n
                         }
                         // If neighbour not in backward frontier
                         if (!seenBackward.has(nextKey)) {
-                            seenBackward.set(nextKey, nextPQNode);
                             pqBackward.insert(nextPQNode);
-                            nextPQNode.vertex.isExplored = true;
-                            console.log("Explored Backward ", seenBackward);
-                            await new Promise((resolve) => setTimeout(resolve, stepTime));
-                            // Avoid double counting visited nodes
-                            if (!seenForward.has(nextKey)) {
-                                setSteps((prev) => prev + 1);
-                            }
-                            setGrid(grid);
                         }
                         // If neighbour in backward frontier and a lower cost path is found, we want to explore that as well.
                         const existPQNode : PQNode | undefined = seenBackward.get(nextKey);
                         if (existPQNode !== undefined && (existPQNode.cost + existPQNode.heuristic) > nextPathCost) {
                             seenBackward.set(nextKey, nextPQNode);  // Overwrite
                             pqBackward.insert(nextPQNode);  // Add to backward frontier
-                            nextPQNode.vertex.isExplored = true;
-                            console.log("Explored Backward ", seenBackward);
-                            await new Promise((resolve) => setTimeout(resolve, stepTime));
-                            setGrid(grid);
                         }
                         // If neighbour in forward frontier
                         if (seenForward.has(nextKey)) {

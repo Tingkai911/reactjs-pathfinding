@@ -1,5 +1,5 @@
 import './App.css'
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Grid, initializeGrid, SearchProgress} from "./logic/graph.ts";
 import VertexComponent from "./components/VertexComponent.tsx";
 import bfs from "./logic/bfs.ts";
@@ -9,17 +9,24 @@ import biastar from "./logic/biastar.ts";
 
 function App() {
     const stepTime: number = 1;
+    const defaultGridSize: number = 9;
     // Not a hard limit in terms of algorithm implementation, but for grid larger tha 50x50 is hard to fit on screen
     const minSize: number = 0;
     const maxSize: number = 50;
 
-    const [gridSize, setGridSize] = useState<number>(30);
+    const [gridSize, setGridSize] = useState<number>(defaultGridSize);
     const [steps, setSteps] = useState<number>(0);
     const [progress, setProgress] = useState<SearchProgress>(SearchProgress.NOT_STARTED);
     const [start, setStart] = useState<number[] | null>(null)
     const [goal, setGoal] = useState<number[] | null>(null)
     const [grid, setGrid] = useState<Grid>(initializeGrid(gridSize));
     const [algorithm, setAlgorithm] = useState<string>('BFS');
+
+    useEffect(() => {
+        if (progress === SearchProgress.INCOMPLETE) {
+            alert("No path found between start and goal.");
+        }
+    }, [progress]);
 
     const handleGridClick = (row: number, col: number): void => {
         if (progress !== SearchProgress.NOT_STARTED) {
