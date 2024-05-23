@@ -6,10 +6,11 @@ import bfs from "./logic/bfs.ts";
 import dfs from "./logic/dfs.ts";
 import astar from "./logic/astar.ts";
 import biastar from "./logic/biastar.ts";
+import createMaze from "./logic/maze.ts";
 
 function App() {
     const stepTime: number = 1;
-    const defaultGridSize: number = 9;
+    const defaultGridSize: number = 30;
     // Not a hard limit in terms of algorithm implementation, but for grid larger tha 50x50 is hard to fit on screen
     const minSize: number = 0;
     const maxSize: number = 50;
@@ -120,6 +121,17 @@ function App() {
         setAlgorithm(event.target.value);
     };
 
+    const generateRandomMaze = () => {
+        if (progress === SearchProgress.IN_PROGRESS) {
+            return;
+        }
+        const [randomizedGrid, startPos, goalPos] = createMaze(initializeGrid(gridSize));
+        setGrid(randomizedGrid);
+        setStart(startPos);
+        setGoal(goalPos);
+        setProgress(SearchProgress.NOT_STARTED);
+    };
+
     return (
         <>
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
@@ -148,6 +160,9 @@ function App() {
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '300px'}}>
                         <button onClick={startBFS} style={{marginRight: '10px'}}>Start</button>
                         <button onClick={resetGrid}>Reset</button>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'center', width: '100%', maxWidth: '300px'}}>
+                        <button onClick={generateRandomMaze}>Generate Maze</button>
                     </div>
                 </div>
                 <div style={{
